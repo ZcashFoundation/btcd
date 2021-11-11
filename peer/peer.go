@@ -102,6 +102,9 @@ type MessageListeners struct {
 	// OnAddr is invoked when a peer receives an addr bitcoin message.
 	OnAddr func(p *Peer, msg *wire.MsgAddr)
 
+	// OnAddr is invoked when a peer receives an addrv2 bitcoin message.
+	OnAddrV2 func(p *Peer, msg *wire.MsgAddrV2)
+
 	// OnPing is invoked when a peer receives a ping bitcoin message.
 	OnPing func(p *Peer, msg *wire.MsgPing)
 
@@ -849,6 +852,35 @@ func (p *Peer) PushAddrMsg(addresses []*wire.NetAddress) ([]*wire.NetAddress, er
 	return msg.AddrList, nil
 }
 
+// PushAddrV2Msg is similar to PushAddrMsg, but for NetAddressV2 addresses.
+func (p *Peer) PushAddrV2Msg(addresses []*wire.NetAddressV2) ([]*wire.NetAddressV2, error) {
+	addressCount := len(addresses)
+
+	// Nothing to send.
+	if addressCount == 0 {
+		return nil, nil
+	}
+
+	msg := wire.NewMsgAddrV2()
+	msg.AddrList = make([]*wire.NetAddressV2, addressCount)
+	copy(msg.AddrList, addresses)
+
+	// Randomize the addresses sent if there are more than the maximum allowed.
+	if addressCount > wire.MaxAddrPerMsg {
+		// Shuffle the address list.
+		for i := 0; i < wire.MaxAddrPerMsg; i++ {
+			j := i + rand.Intn(addressCount-i)
+			msg.AddrList[i], msg.AddrList[j] = msg.AddrList[j], msg.AddrList[i]
+		}
+
+		// Truncate it to the maximum size.
+		msg.AddrList = msg.AddrList[:wire.MaxAddrPerMsg]
+	}
+
+	p.QueueMessage(msg, nil)
+	return msg.AddrList, nil
+}
+
 // PushGetBlocksMsg sends a getblocks message for the provided block locator
 // and stop hash.  It will ignore back-to-back duplicate requests.
 //
@@ -1397,6 +1429,11 @@ out:
 		case *wire.MsgAddr:
 			if p.cfg.Listeners.OnAddr != nil {
 				p.cfg.Listeners.OnAddr(p, msg)
+			}
+
+		case *wire.MsgAddrV2:
+			if p.cfg.Listeners.OnAddrV2 != nil {
+				p.cfg.Listeners.OnAddrV2(p, msg)
 			}
 
 		case *wire.MsgPing:
