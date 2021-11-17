@@ -103,7 +103,7 @@ func (msg *MsgAddrV2) MaxPayloadLength(pver uint32) uint32 {
 	return MaxVarIntPayload + (MaxAddrPerMsg * maxNetAddressPayloadV2(pver))
 }
 
-// NewMsgAddrV2 returns a new bitcoin sendaddrv2 message that conforms to the
+// NewMsgAddrV2 returns a new bitcoin addrv2 message that conforms to the
 // Message interface.
 func NewMsgAddrV2() *MsgAddrV2 {
 	return &MsgAddrV2{

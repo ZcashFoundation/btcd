@@ -20,7 +20,9 @@ const (
 	NIIPV4 NetworkID = 0x01
 	// NIIPV6 is a IPv6 address (globally routed internet)
 	NIIPV6 NetworkID = 0x02
-	// NITorV2 is a Tor v2 hidden service address
+	// NITorV2 is a Tor v2 hidden service address.
+	// Disabled by Tor as of October 2021:
+	// https://support.torproject.org/onionservices/v2-deprecation/
 	NITorV2 NetworkID = 0x03
 	// NITorV3 is a Tor v3 hidden service address
 	NITorV3 NetworkID = 0x04
