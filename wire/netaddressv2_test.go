@@ -51,7 +51,7 @@ func TestNetAddressV2(t *testing.T) {
 
 	// Ensure max payload is expected value for latest protocol version.
 	pver := ProtocolVersion
-	wantPayload := uint32(512 + 25)
+	wantPayload := uint32(512 + 19)
 	maxPayload := maxNetAddressPayloadV2(ProtocolVersion)
 	if maxPayload != wantPayload {
 		t.Errorf("maxNetAddressPayloadV2: wrong max payload length for "+

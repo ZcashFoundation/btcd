@@ -836,17 +836,16 @@ func (p *Peer) PushAddrMsg(addresses []*wire.NetAddress) ([]*wire.NetAddress, er
 	msg.AddrList = make([]*wire.NetAddress, addressCount)
 	copy(msg.AddrList, addresses)
 
-	// Randomize the addresses sent if there are more than the maximum allowed.
+	// Randomize the addresses sent
+	rand.Shuffle(addressCount, func(i, j int) {
+		msg.AddrList[i], msg.AddrList[j] = msg.AddrList[j], msg.AddrList[i]
+	})
 	if addressCount > wire.MaxAddrPerMsg {
-		// Shuffle the address list.
-		for i := 0; i < wire.MaxAddrPerMsg; i++ {
-			j := i + rand.Intn(addressCount-i)
-			msg.AddrList[i], msg.AddrList[j] = msg.AddrList[j], msg.AddrList[i]
-		}
-
-		// Truncate it to the maximum size.
-		msg.AddrList = msg.AddrList[:wire.MaxAddrPerMsg]
+		addressCount = wire.MaxAddrPerMsg
 	}
+
+	// Truncate it to the maximum size.
+	msg.AddrList = msg.AddrList[:addressCount]
 
 	p.QueueMessage(msg, nil)
 	return msg.AddrList, nil
@@ -865,17 +864,16 @@ func (p *Peer) PushAddrV2Msg(addresses []*wire.NetAddressV2) ([]*wire.NetAddress
 	msg.AddrList = make([]*wire.NetAddressV2, addressCount)
 	copy(msg.AddrList, addresses)
 
-	// Randomize the addresses sent if there are more than the maximum allowed.
+	// Randomize the addresses sent
+	rand.Shuffle(addressCount, func(i, j int) {
+		msg.AddrList[i], msg.AddrList[j] = msg.AddrList[j], msg.AddrList[i]
+	})
 	if addressCount > wire.MaxAddrPerMsg {
-		// Shuffle the address list.
-		for i := 0; i < wire.MaxAddrPerMsg; i++ {
-			j := i + rand.Intn(addressCount-i)
-			msg.AddrList[i], msg.AddrList[j] = msg.AddrList[j], msg.AddrList[i]
-		}
-
-		// Truncate it to the maximum size.
-		msg.AddrList = msg.AddrList[:wire.MaxAddrPerMsg]
+		addressCount = wire.MaxAddrPerMsg
 	}
+
+	// Truncate it to the maximum size.
+	msg.AddrList = msg.AddrList[:addressCount]
 
 	p.QueueMessage(msg, nil)
 	return msg.AddrList, nil

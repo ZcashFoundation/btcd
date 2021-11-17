@@ -51,7 +51,10 @@ func maxNetAddressPayloadV2(pver uint32) uint32 {
 	// networkID
 	plen += 1
 	// address
-	plen += MaxVarIntPayload + MaxAddrV2Size
+	// We use 3 instead of MaxVarIntPayload because of MaxAddrV2Size limit,
+	// which forces the CompactSize prefix to have at most 3 bytes
+	// (1 byte length selection prefix, plus a 2 byte integer).
+	plen += 3 + MaxAddrV2Size
 	// port
 	plen += 2
 	return plen

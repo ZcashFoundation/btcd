@@ -39,7 +39,7 @@ func TestAddrV2(t *testing.T) {
 
 	// Ensure max payload is expected value for latest protocol version.
 	// Num addresses (varInt) + num * (time + services + networkID + addr len + addr + port)
-	wantPayload := uint32(9 + 1000*(4+9+1+9+512+2))
+	wantPayload := uint32(9 + 1000*(4+9+1+3+512+2))
 	maxPayload := msg.MaxPayloadLength(pver)
 	if maxPayload != wantPayload {
 		t.Errorf("MaxPayloadLength: wrong max payload length for "+
