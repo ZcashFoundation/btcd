@@ -263,6 +263,11 @@ type Config struct {
 	// peer.MaxProtocolVersion will be used.
 	ProtocolVersion uint32
 
+	// MinAcceptableProtocolVersion specifies the minimum acceptable protocol
+	// version to accept from peers. The field can be omitted in which case
+	// peer.MinAcceptableProtocolVersion will be used.
+	MinAcceptableProtocolVersion uint32
+
 	// DisableRelayTx specifies if the remote peer should be informed to
 	// not send inv messages for transactions.
 	DisableRelayTx bool
@@ -1991,12 +1996,12 @@ func (p *Peer) readRemoteVersionMsg() error {
 	// NOTE: If minAcceptableProtocolVersion is raised to be higher than
 	// wire.RejectVersion, this should send a reject packet before
 	// disconnecting.
-	if uint32(msg.ProtocolVersion) < MinAcceptableProtocolVersion {
+	if uint32(msg.ProtocolVersion) < p.cfg.MinAcceptableProtocolVersion {
 		// Send a reject message indicating the protocol version is
 		// obsolete and wait for the message to be sent before
 		// disconnecting.
 		reason := fmt.Sprintf("protocol version must be %d or greater",
-			MinAcceptableProtocolVersion)
+			p.cfg.MinAcceptableProtocolVersion)
 		rejectMsg := wire.NewMsgReject(msg.Command(), wire.RejectObsolete,
 			reason)
 		_ = p.writeMessage(rejectMsg, wire.LatestEncoding)
@@ -2249,6 +2254,10 @@ func newPeerBase(origCfg *Config, inbound bool) *Peer {
 	cfg := *origCfg // Copy to avoid mutating caller.
 	if cfg.ProtocolVersion == 0 {
 		cfg.ProtocolVersion = MaxProtocolVersion
+	}
+
+	if cfg.MinAcceptableProtocolVersion == 0 {
+		cfg.MinAcceptableProtocolVersion = MinAcceptableProtocolVersion
 	}
 
 	// Set the chain parameters to testnet if the caller did not specify any.
